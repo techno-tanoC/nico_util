@@ -12,7 +12,7 @@ module NicoUtil
 
     def initialize(str)
       stripper = ->(doc){ doc.elements['nicovideo_thumb_response/thumb'] }
-      build = REXML::Document._.new >> stripper >> method(:validate)
+      build = REXML::Document._.new >> method(:validate) >> stripper
 
       @doc =
       if str =~ ID_REGEX
@@ -104,12 +104,13 @@ module NicoUtil
 
     private
     def validate(doc)
-      if doc.attribute('status') == "fail"
-        raise doc.elements["nicovideo_thumb_response/error/description"].text
-      else
+      if doc.root.attribute('status') == REXML::Attribute.new("status", "ok")
         doc
+      else
+        raise doc.elements["nicovideo_thumb_response/error/description"].text
       end
     end
+
     def get_text(tag)
       @doc.elements[tag].text
     end
