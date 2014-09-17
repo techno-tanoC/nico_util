@@ -11,8 +11,7 @@ module NicoUtil
     ID_REGEX = /^((sm|nm)(\d+))$/
 
     def initialize(str)
-      stripper = ->(doc){ doc.elements['nicovideo_thumb_response/thumb'] }
-      build = REXML::Document._.new >> method(:validate) >> stripper
+      build = REXML::Document._.new >> method(:validate) >> (:get_elements & 'nicovideo_thumb_response/thumb') >> :first
 
       @doc =
       if str =~ ID_REGEX
@@ -107,12 +106,12 @@ module NicoUtil
       if doc.root.attribute('status') == REXML::Attribute.new("status", "ok")
         doc
       else
-        raise doc.elements["nicovideo_thumb_response/error/description"].text
+        raise doc.get_text("nicovideo_thumb_response/error/description")
       end
     end
 
     def get_text(tag)
-      @doc.elements[tag].text
+      @doc.get_text(tag)
     end
   end
 end
