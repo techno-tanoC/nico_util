@@ -14,65 +14,36 @@ module NicoUtil
       build = REXML::Document._.new >> method(:validate) >> (:get_elements & 'nicovideo_thumb_response/thumb') >> :first
 
       @doc =
-      if str =~ ID_REGEX
-        THUMB._.+ >> method(:open) >> build < str
-      elsif str.kind_of?(String)
-        build < str
-      else
-        raise "invalid source"
-      end
+        if str =~ ID_REGEX
+          THUMB._.+ >> method(:open) >> build < str
+        elsif str.kind_of?(String)
+          build < str
+        else
+          raise "invalid source"
+        end
     end
 
-    def video_id
-      get_text 'video_id'
+    [
+      :video_id, :title, :description, :thumbnail_url,
+      :length, :movie_type, :size_high, :size_low,
+      :last_res_body, :watch_url, :thumb_type, :embeddable,
+      :no_live_play
+    ].each do |name|
+      define_method(name) {
+        method(:get_text_by_symbol) < name
+      }
     end
-    def title
-      get_text 'title'
+
+    [
+      :view_counter, :comment_num, :mylist_counter
+    ].each do |name|
+      define_method(name) {
+        method(:get_text_by_symbol) >> :to_i < name
+      }
     end
-    def description
-      get_text 'description'
-    end
-    def thumbnail_url
-      get_text 'thumbnail_url'
-    end
+
     def first_retrieve
       method(:get_text) >> DateTime._.parse < "first_retrieve"
-    end
-    def length
-      get_text 'length'
-    end
-    def movie_type
-      get_text 'movie_type'
-    end
-    def size_high
-      get_text 'size_high'
-    end
-    def size_low
-      get_text 'size_low'
-    end
-    def view_counter
-      get_text('view_counter').to_i
-    end
-    def comment_num
-      get_text('comment_num').to_i
-    end
-    def mylist_counter
-      get_text('mylist_counter').to_i
-    end
-    def last_res_body
-      get_text 'last_res_body'
-    end
-    def watch_url
-      get_text 'watch_url'
-    end
-    def thumb_type
-      get_text 'thumb_type'
-    end
-    def embeddable
-      get_text 'embeddable'
-    end
-    def no_live_play
-      get_text 'no_live_play'
     end
     def tags
       @doc.get_elements('tags[@domain="jp"]/tag').map(&:text)
@@ -111,7 +82,11 @@ module NicoUtil
     end
 
     def get_text(tag)
-      @doc.get_text(tag)
+      @doc._.text < tag
+    end
+
+    def get_text_by_symbol(sym)
+      :to_s >> method(:get_text) < sym
     end
   end
 end
