@@ -74,7 +74,7 @@ module NicoUtil
 
     private
     def validate(doc)
-      if doc.root.attribute('status') == REXML::Attribute.new("status", "ok")
+      if doc.root.attribute('status').value == "ok"
         doc
       else
         raise doc.get_text("nicovideo_thumb_response/error/description")
