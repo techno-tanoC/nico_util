@@ -30,7 +30,7 @@ module NicoUtil
       :no_live_play
     ].each do |name|
       define_method(name) {
-        instance_variable_get("@" + name.to_s) || instance_variable_set("@" + name.to_s, method(:get_text_by_symbol) < name)
+        guard_attr(name, method(:get_text_by_symbol) < name)
       }
     end
 
@@ -38,15 +38,15 @@ module NicoUtil
       :view_counter, :comment_num, :mylist_counter
     ].each do |name|
       define_method(name) {
-        instance_variable_get("@" + name.to_s) || instance_variable_set("@" + name.to_s, method(:get_text_by_symbol) >> :to_i < name)
+        guard_attr(name, method(:get_text_by_symbol) >> :to_i < name)
       }
     end
 
     def first_retrieve
-      instance_variable_get("@first_retrieve") || instance_variable_set("@first_retrieve", method(:get_text) >> DateTime._.parse < "first_retrieve")
+      guard_attr("first_retrieve", method(:get_text) >> DateTime._.parse < "first_retrieve")
     end
     def tags
-      instance_variable_get("@tags") || instance_variable_set("@tags", @doc.get_elements('tags[@domain="jp"]/tag').map(&:text))
+      guard_attr("tags", @doc.get_elements('tags[@domain="jp"]/tag').map(&:text))
     end
  
     def to_h
@@ -73,6 +73,10 @@ module NicoUtil
     end
 
     private
+    def guard_attr(sym, val)
+      instance_variable_get("@" + sym.to_s) || instance_variable_set("@" + sym.to_s, val)
+    end
+
     def validate(doc)
       if doc.root.attribute('status').value == "ok"
         doc
