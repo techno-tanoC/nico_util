@@ -13,7 +13,7 @@ module NicoUtil
     def initialize(str)
       build = REXML::Document._.new >> method(:validate) >> (:get_elements & 'nicovideo_thumb_response/thumb') >> :first
 
-      doc =
+      @doc =
         if str =~ ID_REGEX
           THUMB._.+ >> method(:open) >> build < str
         elsif str.kind_of?(String)
@@ -21,27 +21,34 @@ module NicoUtil
         else
           raise "invalid source"
         end
-
-      get_text = ->(tag) { doc._.text < tag }
-      get_text_by_symbol = :to_s >> get_text
-
-      [
-        :video_id, :title, :description, :thumbnail_url,
-        :length, :movie_type, :size_high, :size_low,
-        :last_res_body, :watch_url, :thumb_type, :embeddable,
-        :no_live_play
-      ].each do |sym|
-        attr_setter(sym, get_text_by_symbol < sym)
-      end
-
-      [ :view_counter, :comment_num, :mylist_counter ].each do |sym|
-        attr_setter(sym, get_text_by_symbol >> :to_i < sym)
-      end
-
-      attr_setter(:first_retrieve, get_text >> DateTime._.parse < "first_retrieve")
-      attr_setter(:tags, doc.get_elements('tags[@domain="jp"]/tag').map(&:text))
     end
 
+    [
+      :video_id, :title, :description, :thumbnail_url,
+      :length, :movie_type, :size_high, :size_low,
+      :last_res_body, :watch_url, :thumb_type, :embeddable,
+      :no_live_play
+    ].each do |name|
+      define_method(name) {
+        guard_attr(name, method(:get_text_by_symbol) < name)
+      }
+    end
+
+    [
+      :view_counter, :comment_num, :mylist_counter
+    ].each do |name|
+      define_method(name) {
+        guard_attr(name, method(:get_text_by_symbol) >> :to_i < name)
+      }
+    end
+
+    def first_retrieve
+      guard_attr("first_retrieve", method(:get_text) >> DateTime._.parse < "first_retrieve")
+    end
+    def tags
+      guard_attr("tags", @doc.get_elements('tags[@domain="jp"]/tag').map(&:text))
+    end
+ 
     def to_h
       {
         video_id: video_id,
@@ -66,11 +73,8 @@ module NicoUtil
     end
 
     private
-    def attr_setter(sym, val)
-      instance_variable_set("@" + sym.to_s, val)
-      self.class.class_eval do |_|
-        attr_reader sym
-      end
+    def guard_attr(sym, val)
+      instance_variable_get("@" + sym.to_s) || instance_variable_set("@" + sym.to_s, val)
     end
 
     def validate(doc)
@@ -79,6 +83,14 @@ module NicoUtil
       else
         raise doc.get_text("nicovideo_thumb_response/error/description")
       end
+    end
+
+    def get_text(tag)
+      @doc._.text < tag
+    end
+
+    def get_text_by_symbol(sym)
+      :to_s >> method(:get_text) < sym
     end
   end
 end
