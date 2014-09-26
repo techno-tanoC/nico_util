@@ -7,9 +7,14 @@ end
 
 module NicoUtil
   module Nico
+    REGEX = /(http:\/\/www\.nicovideo\.jp\/watch\/)?((sm|nm)(\d+))/
     def extract_id(url)
-      regex = /(http:\/\/www\.nicovideo\.jp\/watch\/)?((sm|nm)(\d+))/
-      if url =~ regex then $2 else raise "invalid url" end
+      if url =~ REGEX then $2 else raise "invalid url" end
+    end
+
+    def constract(str)
+      url = "http://www.nicovideo.jp/watch/"
+      if str =~ REGEX then url + $2 else raise "invalid str" end
     end
   end
 
