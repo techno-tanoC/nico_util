@@ -43,26 +43,15 @@ module NicoUtil
     end
 
     def to_h
-      {
-        video_id: video_id,
-        title: title,
-        description: description,
-        thumbnail_url: thumbnail_url,
-        first_retrieve: first_retrieve,
-        length: length,
-        movie_type: movie_type,
-        size_high: size_high,
-        size_low: size_low,
-        view_counter: view_counter,
-        comment_num: comment_num,
-        mylist_counter: mylist_counter,
-        last_res_body: last_res_body,
-        watch_url: watch_url,
-        thumb_type: thumb_type,
-        embeddable: embeddable,
-        no_live_play: no_live_play,
-        tags: tags
-      }
+      [
+        :video_id, :title, :description, :thumbnail_url,
+        :first_retrieve, :length, :movie_type, :size_high,
+        :size_low, :view_counter, :comment_num, :mylist_counter,
+        :last_res_body, :watch_url, :thumb_type, :embeddable,
+        :no_live_play, :tags
+      ].map {|sym|
+        [sym, public_send(sym)]
+      }.to_h
     end
 
     private

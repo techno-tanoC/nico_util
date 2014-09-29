@@ -70,10 +70,22 @@ describe 'NicoUtil' do
         expect(NicoUtil::ThumbInfo.new(ok_xml).title).to eq(ans)
       end
     end
+
+    describe '#view_counter' do
+      it 'should get view_counter' do
+      end
+    end
+
     describe "#tags" do
       it 'should get tags' do
         ans = ["陰陽師", "レッツゴー！陰陽師", "公式", "音楽", "ゲーム", "sm9", "豪血寺一族", "最古の動画", "運営のお気に入り", "β時代の英雄"]
         expect(NicoUtil::ThumbInfo.new(ok_xml).tags).to eq(ans)
+      end
+    end
+
+    describe '#to_h' do
+      it 'should get tags' do
+        p NicoUtil::ThumbInfo.new(ok_xml).to_h
       end
     end
   end
