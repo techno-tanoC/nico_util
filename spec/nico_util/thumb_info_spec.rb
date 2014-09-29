@@ -85,7 +85,7 @@ describe 'NicoUtil' do
 
     describe '#to_h' do
       it 'should get tags' do
-        p NicoUtil::ThumbInfo.new(ok_xml).to_h
+        NicoUtil::ThumbInfo.new(ok_xml).to_h
       end
     end
   end
