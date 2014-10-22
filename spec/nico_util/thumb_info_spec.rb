@@ -43,7 +43,6 @@ ok_xml = <<"XML"
 XML
 
 fail_xml = <<XML
-
 <?xml version="1.0" encoding="UTF-8"?>
 <nicovideo_thumb_response status="fail">
   <error>

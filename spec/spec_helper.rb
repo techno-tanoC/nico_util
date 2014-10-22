@@ -2,4 +2,3 @@
 
 require 'rspec'
 require 'nico_util'
-

@@ -5,13 +5,21 @@ require 'open-uri'
 require 'rexml/document'
 require 'lambda_driver'
 
+require 'nico_util/validate'
+require 'nico_util/attr_setter'
+require 'nico_util/hashable'
+
 module NicoUtil
   class ThumbInfo
+    include NicoUtil::Validate
+    include NicoUtil::AttrSetter
+    include NicoUtil::Hashable
+
     THUMB = "http://ext.nicovideo.jp/api/getthumbinfo/"
     ID_REGEX = /^((sm|nm)(\d+))$/
 
     def initialize(str)
-      build = REXML::Document._.new >> method(:validate) >> (:get_elements & 'nicovideo_thumb_response/thumb') >> :first
+      build = REXML::Document._.new >> method(:validate_state) >> (:get_elements & 'nicovideo_thumb_response/thumb') >> :first
 
       doc =
         if str =~ ID_REGEX
@@ -42,32 +50,20 @@ module NicoUtil
       attr_setter(:tags, doc.get_elements('tags[@domain="jp"]/tag').map(&:text))
     end
 
+    #undefined method `to_h' under ruby2.1
     def to_h
-      [
+      to_hash_by_public_send([
         :video_id, :title, :description, :thumbnail_url,
         :first_retrieve, :length, :movie_type, :size_high,
         :size_low, :view_counter, :comment_num, :mylist_counter,
         :last_res_body, :watch_url, :thumb_type, :embeddable,
         :no_live_play, :tags
-      ].map {|sym|
-        [sym, public_send(sym)]
-      }.to_h
+      ], [])
     end
+  end
 
-    private
-    def attr_setter(sym, val)
-      instance_variable_set("@" + sym.to_s, val)
-      self.class.class_eval do |_|
-        attr_reader sym
-      end
-    end
-
-    def validate(doc)
-      if doc.root.attribute('status').value == "ok"
-        doc
-      else
-        raise doc.get_text("nicovideo_thumb_response/error/description")
-      end
+  def missing_method(name, *args)
+    if method_defined?(name)
     end
   end
 end
