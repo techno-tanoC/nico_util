@@ -61,9 +61,4 @@ module NicoUtil
       ], [])
     end
   end
-
-  def missing_method(name, *args)
-    if method_defined?(name)
-    end
-  end
 end
