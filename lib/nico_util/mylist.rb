@@ -40,16 +40,16 @@ module NicoUtil
       [
         :title, :link, :description, :pubDate, :lastBuildDate
       ].each do |sym|
-        attr_setter(sym, :to_s >> doc._.text < sym)
+        attr_setter(sym, :to_s >> doc._.text < sym || "")
       end
-      attr_setter(:creator, doc._.text < "dc:creator")
+      attr_setter(:creator, doc._.text < "dc:creator" || "")
     end
 
     def assignee_item doc
       attr_setter(:items) do
         doc.get_elements("item").map do |item|
           [:title, :link, :pubDate, :description].map {|sym|
-            [sym, :to_s >> item._.text < sym]
+            [sym, :to_s >> item._.text < sym || ""]
           }.to_h
         end
       end
