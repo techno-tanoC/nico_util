@@ -23,20 +23,9 @@ module NicoUtil
           raise "not mylist url or unexist mylist"
         end
 
-      [
-        :title, :link, :description, :pubDate, :lastBuildDate
-      ].each do |sym|
-        attr_setter(sym, :to_s >> doc._.text < sym)
-      end
-      attr_setter(:creator, doc._.text < "dc:creator")
+      assignee_meta(doc)
 
-      attr_setter(:items) do
-        doc.get_elements("item").map do |item|
-          [:title, :link, :pubDate, :description].map {|sym|
-            [sym, :to_s >> item._.text < sym]
-          }.to_h
-        end
-      end
+      assignee_item(doc)
     end
 
     def to_h
@@ -45,6 +34,25 @@ module NicoUtil
     private
     def build_url(mylist_id)
       "http://www.nicovideo.jp/mylist/#{mylist_id}?rss=2.0"
+    end
+
+    def assignee_meta doc
+      [
+        :title, :link, :description, :pubDate, :lastBuildDate
+      ].each do |sym|
+        attr_setter(sym, :to_s >> doc._.text < sym)
+      end
+      attr_setter(:creator, doc._.text < "dc:creator")
+    end
+
+    def assignee_item doc
+      attr_setter(:items) do
+        doc.get_elements("item").map do |item|
+          [:title, :link, :pubDate, :description].map {|sym|
+            [sym, :to_s >> item._.text < sym]
+          }.to_h
+        end
+      end
     end
   end
 end
