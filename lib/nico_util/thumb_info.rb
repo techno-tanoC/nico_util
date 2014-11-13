@@ -58,7 +58,7 @@ module NicoUtil
         :size_low, :view_counter, :comment_num, :mylist_counter,
         :last_res_body, :watch_url, :thumb_type, :embeddable,
         :no_live_play, :tags
-      ], [])
+      ])
     end
   end
 end

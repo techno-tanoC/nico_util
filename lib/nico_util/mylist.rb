@@ -12,13 +12,16 @@ module NicoUtil
     include NicoUtil::AttrSetter
     include NicoUtil::Hashable
 
-    URL = /(http:\/\/www\.nicovideo\.jp\/mylist\/)?(\d+)(\?rss=2\.0)?/
-    def initialize(group_id)
-      builder = method(:build_url) >> method(:open) >> :read >> REXML::Document._.new >> (:get_elements & "rss/channel") >> :first
+    URL = /^(http:\/\/www\.nicovideo\.jp\/mylist\/)?(\d+)(\?rss=2\.0)?$/
+    def initialize(str)
+      reader = method(:build_url) >> method(:open) >> :read
+      builder = REXML::Document._.new >> (:get_elements & "rss/channel") >> :first
 
       doc =
-        if URL =~ group_id
-          builder < $2
+        if URL =~ str
+          reader >> builder < $2
+        elsif str.kind_of?(String)
+          builder < str
         else
           raise "not mylist url or unexist mylist"
         end
@@ -29,6 +32,9 @@ module NicoUtil
     end
 
     def to_h
+      buff = to_hash_by_public_send([:title, :link, :description, :pubDate, :lastBuildDate])
+      buff[:items] = @items
+      buff
     end
 
     private
